@@ -1,4 +1,4 @@
-# Snowflake-Build-Tool
+# **Snowcone**: Snowflake Build Tool
 
 [![Clojure](https://img.shields.io/badge/clojure-babashka-%235881D8.svg?logo=clojure&logoColor=white)](https://book.babashka.org/)
 [![GitHub](https://img.shields.io/badge/github-hosted-blue?logo=github&logocolor=white)](https://github.com/RyanFleck/Snowflake-Build-Tool)

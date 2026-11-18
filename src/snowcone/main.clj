@@ -22,6 +22,7 @@
 (def arg-spec
   {:dir   {:alias :C                  ; like git's own -C
            :desc "Run as if snowcone was started in <dir>"
+           :default (fs/cwd)
            :validate                  ; tests if --dir exists,
            {:pred dir-exists?         ; with a custom error message
             :ex-msg (fn [{:keys [value]}]
@@ -38,8 +39,8 @@
   (println "Here are your cli args!:" opts)
 
   ;; Preflight Checks
-  (checks/check-if-git-repository-root (fs/cwd))
-  (checks/check-if-config-file-is-valid (fs/cwd))
+  (checks/check-if-git-repository-root (:dir opts))
+  (checks/check-if-config-file-is-valid (:dir opts))
 
   (println "Success. Please validate output."))
 
