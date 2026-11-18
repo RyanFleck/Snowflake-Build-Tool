@@ -11,7 +11,7 @@
   "Runs a command, raises an exception if an error is encountered."
   ([^String cmd] (run-command cmd {}))
   ([^String cmd options]
-   (println (str "Running command '" cmd "' with options: " options))
+   (println (str "CMD: Running command '" cmd "' with options: " options))
    (apply p/shell
           (merge {:out :string :err :string} options)
           (split-to-list cmd))))
