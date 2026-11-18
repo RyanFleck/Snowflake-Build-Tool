@@ -27,6 +27,9 @@
    :push  {:coerce :boolean           ; defines a boolean flag
            :desc "Push when finished with build operation"}
 
+   :offline  {:coerce :boolean           ; defines a boolean flag
+              :desc "Don't fetch branches and perform other network-related git activites"}
+
    :show-config  {:coerce :boolean
                   :desc "Show the loaded config after ingestion"}
 
