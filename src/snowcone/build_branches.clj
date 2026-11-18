@@ -27,14 +27,16 @@
     (prn target-data))
 
   (println (str "Building target '" target-id "'"))
-
+  
+  ;; Switch to the source branch
   (gitops/switch-branch (:source_branch target-data) dir)
 
+  ;; Create .tmp-build-<slug> directory to copy files to
 )
 
 (defn build-branches
   "Proceeds with the construction of build branches."
-  [{:keys [offline dir environments] :as config}]
+  [{:keys [offline dir environments build-all-branches] :as config}]
   (println "Branching build strategy selected.")
 
   (when-not offline
@@ -63,9 +65,23 @@
 
     (println "All required branches present. Proceeding with branch-based build.")
 
+    ;; NOTE: It would probably be smartest only to build from the
+    ;; branch that the user is currently present on to ensure that the
+    ;; build files listed in the config are actually present.
+
+    ;; Filter environments by those that match the current base branch
+    (let [target-envs (cond->> environments
+                        (not build-all-branches)
+                        (filter (fn [[_ envr]] (= current-branch (:source_branch envr)))))]
+
+      ;; Show a message when not all branches are being assembled
+      (when-not build-all-branches
+        (println (str "Building only branches sourced from '" current-branch "'"
+                      ", switch branches to build others or use --build-all-branches")))
+
     ;; We can destructure the map entry to [key value]
-    (doseq [[target-id target-data] environments]
-      (build-one-branch target-data target-id config)))
+      (doseq [[target-id target-data] target-envs]
+        (build-one-branch target-data target-id config))))
 
 ;; (throw (ex-info "Not yet implemented." config))
   )

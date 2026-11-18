@@ -33,6 +33,9 @@
    :show-config  {:coerce :boolean
                   :desc "Show the loaded config after ingestion"}
 
+   :build-all-branches  {:coerce :boolean
+                   :desc "Branch-based builds: Rebuild from all base branches"}
+
    :verbose {:coerce :boolean
              :desc "Show extra debugging outputs"}})
 
