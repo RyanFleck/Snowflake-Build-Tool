@@ -22,27 +22,31 @@
 (def arg-spec
   {:dir   {:alias :C                  ; like git's own -C
            :desc "Run as if snowcone was started in <dir>"
-           :default (fs/cwd)
+           :default (str (fs/cwd))
            :validate                  ; tests if --dir exists,
            {:pred dir-exists?         ; with a custom error message
             :ex-msg (fn [{:keys [value]}]
                       (str "Directory does not exist: " value))}}
 
-
    :push  {:coerce :boolean           ; defines a boolean flag
            :desc "Push when finished with build operaion"}})
 
+(defn clean-opts [opts]
+  (-> opts
+      (assoc :dir (str (fs/normalize (fs/expand-home (:dir opts)))))))
 
 
-(defn run [opts]
+(defn run [dirty-opts]
   (println "Snowcone: Snowflake Build Tool 0.1.0")
-  (println "Here are your cli args!:" opts)
+  (println "Command line arguments passed:")
+  (let [opts (clean-opts dirty-opts)]
+    (prn opts)
 
   ;; Preflight Checks
-  (checks/check-if-git-repository-root (:dir opts))
-  (checks/check-if-config-file-is-valid (:dir opts))
+    (checks/check-if-git-repository-root (:dir opts))
+    (checks/check-if-config-file-is-valid (:dir opts))
 
-  (println "Success. Please validate output."))
+    (println "Success. Please validate output.")))
 
 
 
