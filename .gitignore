@@ -32,3 +32,5 @@ profiles.clj
 
 /.shadow-cljs/
 node_modules/
+test-data.clj
+

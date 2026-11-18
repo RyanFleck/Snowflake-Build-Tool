@@ -3,6 +3,7 @@
    [snowcone.preflight-checks :as checks]
    [babashka.cli :as cli]
    [snowcone.config :refer [get-config-data]]
+   [clojure.pprint :refer [pprint]]
    [babashka.fs :as fs]))
 
 ;; Resources:
@@ -31,21 +32,31 @@
       ;; Clean, expand, home-normalize the provided directory
       (assoc :dir (str (fs/normalize (fs/expand-home (:dir opts)))))))
 
+(defn build-project 
+  "With cleaned and validated config data, builds the Snowflake project."
+  [config]
+
+  (println "Building project with configuration data:")
+  (pprint config)
+)
+
 (defn run
   "Runs the build process based on the provided configuration file"
   [input-opts]
   (println "Snowcone: Snowflake Build Tool 0.1.0")
   (println "Command line arguments passed:")
   (let [opts (clean-opts input-opts)]
-    (prn opts)
+    (pprint opts)
 
     ;; Preflight Checks
     (checks/check-if-git-repository-root (:dir opts))
     (checks/check-if-config-file-is-parsable (:dir opts))
 
     (let [config-data (get-config-data (:dir opts) (:config-name opts))]
-
-      (prn config-data))
+      (build-project
+       (-> config-data
+           (assoc :cli-opts opts)
+           (checks/validate-config))))
 
     (println "Success. Please validate output.")))
 

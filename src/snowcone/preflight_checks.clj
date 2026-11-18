@@ -10,6 +10,22 @@
 ;; Resources:
 ;; https://github.com/babashka/fs
 
+(defn validate-config
+  "Given a parsed config data object, ensure required keys are present"
+  [config]
+
+  (when-not (contains? config :project)
+    (throw (ex-info "Config requires a 'project' section." config)))
+
+  (when-not (contains? config :build)
+    (throw (ex-info "Config requires a 'build' section." config)))
+
+  (when-not (contains? config :environments)
+    (throw (ex-info "Config requires an 'environments' section." config)))
+
+  ;; Ensure 'config' data passes through if all valid.
+  (assoc config :config-validated true))
+
 (defn check-if-git-repository-root
   "Check if the .git folder is present and the user is in a worktree."
   [path]
