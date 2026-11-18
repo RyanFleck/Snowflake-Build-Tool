@@ -16,6 +16,15 @@ See https://github.com/babashka/babashka#installation
 On MacOS: `brew install borkdude/brew/babashka`
 
 
+## Execution
+
+To run, provide `bb` with the cloned classpath and main location.
+
+```bash
+bb -cp ~/vc/Snowflake-Build-Tool/src -m snowcone.main
+```
+
+
 ## Development
 
 Run `bb nrepl-server 0.0.0.0:1667` and then `M-x cider-connect-clj` to jack in.
