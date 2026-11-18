@@ -1,72 +1,73 @@
 (ns snowcone.main
-  (:require 
+  (:require
    [snowcone.preflight-checks :as checks]
    [babashka.cli :as cli]
+   [snowcone.config :refer [get-config-data]]
    [babashka.fs :as fs]))
 
 ;; Resources:
 ;; https://github.com/babashka/cli
 
-;; (defn -main [& _args]
-;;   (println "Snowcone: Snowflake Build Tool 0.1.0")
-;;   (checks/check-if-git-repository-root)
-  
-;;   (println "Success."))
-
-
-(defn dir-exists? [path]
-  (fs/directory? path))
-
-
-
 (def arg-spec
-  {:dir   {:alias :C                  ; like git's own -C
+  {:dir   {:alias :d
            :desc "Run as if snowcone was started in <dir>"
            :default (str (fs/cwd))
            :validate                  ; tests if --dir exists,
-           {:pred dir-exists?         ; with a custom error message
+           {:pred fs/directory?         ; with a custom error message
             :ex-msg (fn [{:keys [value]}]
                       (str "Directory does not exist: " value))}}
+
+   :config-name {:alias :c
+                 :desc "The name of the project configuration file, default 'config.yml'"
+                 :default "config.yml"}
 
    :push  {:coerce :boolean           ; defines a boolean flag
            :desc "Push when finished with build operaion"}})
 
-(defn clean-opts [opts]
+(defn clean-opts
+  "Post-processing for incoming command line arguments"
+  [opts]
   (-> opts
+      ;; Clean, expand, home-normalize the provided directory
       (assoc :dir (str (fs/normalize (fs/expand-home (:dir opts)))))))
 
-
-(defn run [dirty-opts]
+(defn run
+  "Runs the build process based on the provided configuration file"
+  [input-opts]
   (println "Snowcone: Snowflake Build Tool 0.1.0")
   (println "Command line arguments passed:")
-  (let [opts (clean-opts dirty-opts)]
+  (let [opts (clean-opts input-opts)]
     (prn opts)
 
-  ;; Preflight Checks
+    ;; Preflight Checks
     (checks/check-if-git-repository-root (:dir opts))
-    (checks/check-if-config-file-is-valid (:dir opts))
+    (checks/check-if-config-file-is-parsable (:dir opts))
+
+    (let [config-data (get-config-data (:dir opts) (:config-name opts))]
+
+      (prn config-data))
 
     (println "Success. Please validate output.")))
 
-
-
-(defn -main [& args]
-  (cli/dispatch 
-   {:exec-fn run :spec arg-spec} 
+(defn -main
+  "Dispatches the 'run' function with parsed CLI arguments"
+  [& args]
+  (cli/dispatch
+   {:exec-fn run :spec arg-spec}
    args
    {:prog "snowcone" :help true}))
 
-
-
-;; For testing unit testing
-(defn add [a b]
+(defn add
+  "Simple function to unit test"
+  [a b]
   (+ a b))
 
-
-
+;; ================================================================================
+;; Testing
 (comment
   ;; Test the main procedure
   (-main)
+  (add 1 2)
 
   ;; To run main in a babashka script:
   ;;(apply -main *command-line-args*)

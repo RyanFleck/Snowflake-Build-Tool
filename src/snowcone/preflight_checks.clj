@@ -1,15 +1,16 @@
 (ns snowcone.preflight-checks
-  (:require [babashka.process :as p]
-            [babashka.fs :as fs]
-            [clj-yaml.core :as yaml]
-            [clojure.string :as str]))
+  (:require
+   [babashka.process :as p]
+   [babashka.fs :as fs]
+   [clj-yaml.core :as yaml]
+   [clojure.string :as str]))
 
 ;; C-c C-k -> cider-load-buffer
 
 ;; Resources:
 ;; https://github.com/babashka/fs
 
-(defn check-if-git-repository-root 
+(defn check-if-git-repository-root
   "Check if the .git folder is present and the user is in a worktree."
   [path]
 
@@ -18,8 +19,7 @@
 
   (println (str "Operating at path '" path "' which is a valid repository")))
 
-
-(defn check-if-config-file-is-valid 
+(defn check-if-config-file-is-parsable
   "Runs a simple check to see if the config.yml is parseable and has a project.name value."
   [path]
 
@@ -39,14 +39,15 @@
 
     (println (str "Config file 'config.yml' present, project name: '" project-name "'"))))
 
+;; ================================================================================
 ;; Testing
 (comment
-  (check-if-git-repository-root (fs/cwd))
-  (check-if-config-file-is-valid (fs/cwd))
+  ;; (check-if-git-repository-root (fs/cwd))
+  ;; (check-if-config-file-is-parsable (fs/cwd))
 
-(fs/exists? (fs/path (fs/cwd) "config.yml"))
+  (fs/exists? (fs/path (fs/cwd) "config.yml"))
 
-(fs/exists? (fs/path (fs/cwd) "config.yml"))
+  (fs/exists? (fs/path (fs/cwd) "config.yml"))
 
   (p/shell "ls" "-la")
 
