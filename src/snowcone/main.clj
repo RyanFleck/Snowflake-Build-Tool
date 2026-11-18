@@ -1,6 +1,8 @@
 (ns snowcone.main
   (:require
    [snowcone.preflight-checks :as checks]
+   [snowcone.build-folder :refer [build-folder]]
+   [snowcone.build-branches :refer [build-branches]]
    [babashka.cli :as cli]
    [snowcone.config :refer [get-config-data]]
    [clojure.pprint :refer [pprint]]
@@ -23,7 +25,13 @@
                  :default "config.yml"}
 
    :push  {:coerce :boolean           ; defines a boolean flag
-           :desc "Push when finished with build operaion"}})
+           :desc "Push when finished with build operation"}
+
+   :show-config  {:coerce :boolean
+                  :desc "Show the loaded config after ingestion"}
+
+   :verbose {:coerce :boolean
+             :desc "Show extra debugging outputs"}})
 
 (defn clean-opts
   "Post-processing for incoming command line arguments"
@@ -32,30 +40,41 @@
       ;; Clean, expand, home-normalize the provided directory
       (assoc :dir (str (fs/normalize (fs/expand-home (:dir opts)))))))
 
-(defn build-project 
+(defn build-project
   "With cleaned and validated config data, builds the Snowflake project."
   [config]
 
-  (println "Building project with configuration data:")
-  (pprint config)
-)
+  ;; Show configuration if asked for
+  (when (or (:show-config config) (:verbose config))
+    (println "Building project with configuration data:")
+    (pprint config))
+
+  ;; Launch build based on build type
+  (let [build-type (get-in config [:build :type])]
+    (case (keyword build-type)
+      :folder (build-folder config)
+      :branch (build-branches config)
+      (throw (ex-info "Unknown project type." {:type build-type})))))
 
 (defn run
   "Runs the build process based on the provided configuration file"
   [input-opts]
-  (println "Snowcone: Snowflake Build Tool 0.1.0")
-  (println "Command line arguments passed:")
+  (println "\n\nSNOWCONE: Snowflake Build Tool 0.1.0")
   (let [opts (clean-opts input-opts)]
-    (pprint opts)
+
+    (when (:verbose opts)
+      (println "Command line arguments passed:")
+      (pprint opts))
 
     ;; Preflight Checks
     (checks/check-if-git-repository-root (:dir opts))
     (checks/check-if-config-file-is-parsable (:dir opts))
 
+    ;; Combine config data with cli-opts
     (let [config-data (get-config-data (:dir opts) (:config-name opts))]
       (build-project
        (-> config-data
-           (assoc :cli-opts opts)
+           (merge opts) ; include command line options in passed data
            (checks/validate-config))))
 
     (println "Success. Please validate output.")))
