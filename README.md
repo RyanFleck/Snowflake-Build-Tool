@@ -6,6 +6,16 @@ Tool for assembling Snowflake SQL projects into deployment scripts, AKA "**Snowc
 
 Written in **Clojure** language - see the [babashka docs](https://manuals.ryanfleck.ca/clj/#babashka) for notes.
 
+[github.com/RyanFleck/Snowflake-Build-Tool](https://github.com/RyanFleck/Snowflake-Build-Tool)
+
+
+## Installation
+
+See https://github.com/babashka/babashka#installation
+
+On MacOS: `brew install borkdude/brew/babashka`
+
+
 ## Development
 
 Run `bb nrepl-server 0.0.0.0:1667` and then `M-x cider-connect-clj` to jack in.
