@@ -1,6 +1,7 @@
 (ns snowcone.preflight-checks
   (:require
    [babashka.process :as p]
+   [snowcone.shell :refer [run-command]]
    [babashka.fs :as fs]
    [clj-yaml.core :as yaml]
    [clojure.string :as str]))
@@ -30,8 +31,14 @@
   "Check if the .git folder is present and the user is in a worktree."
   [path]
 
+  ;; Ensure the git folder is present
   (when-not (fs/exists? (fs/path path ".git"))
     (throw (ex-info "Not in a git repository" {})))
+
+  ;; Ensure it's a real git worktree
+  (let [result (run-command "git rev-parse --is-inside-work-tree" {:dir path})]
+    (when-not (= 0 (:exit result))
+      (throw (ex-info "Git worktree not valid." {}))))
 
   (println (str "Operating at path '" path "' which is a valid repository")))
 

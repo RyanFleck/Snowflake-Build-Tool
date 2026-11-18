@@ -9,12 +9,12 @@
 
 (defn run-command
   "Runs a command, raises an exception if an error is encountered."
-  [^String cmd]
-
-  (println (str "Running command '" cmd "'"))
-  (apply p/shell  
-         {:out :string :err :string}
-         (split-to-list cmd)))
+  ([^String cmd] (run-command cmd {}))
+  ([^String cmd options]
+   (println (str "Running command '" cmd "' with options: " options))
+   (apply p/shell
+          (merge {:out :string :err :string} options)
+          (split-to-list cmd))))
 
 ;; ================================================================================
 ;; Testing
@@ -22,5 +22,7 @@
   (s/split "sadf asfd" #" ")
 
   (run-command "git pull")
+
+  (run-command "git rev-parse --is-inside-work-tree" {})
 
   (split-to-list "git   pull"))
