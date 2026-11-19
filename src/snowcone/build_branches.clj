@@ -18,7 +18,7 @@
        (set)))
 
 (defn clean-notebook-path [path notebook-file]
-  (-> (str (fs/path path notebook-file))n
+  (-> (str (fs/path path notebook-file))
       (s/replace #"^/" "")))
 
 (defn clean-full-notebook-path [dir path notebook-file]
