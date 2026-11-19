@@ -94,7 +94,7 @@ def main():
 (defn build-one-branch
   "Given a target branch, assemble all notebooks for that branch."
   [{:keys [id source_branch target_branch] :as target-data}
-   {:keys [dir verbose offline notebooks] :as config}]
+   {:keys [dir verbose offline notebooks push] :as config}]
   (try
     (let [env-target-slug (s/trim (s/lower-case (name id)))
           ;; tmp-dir (str (fs/path dir (str ".tmp-" env-target-slug)))
@@ -170,8 +170,20 @@ def main():
         (println (str "Building with commit message: " commit-msg))
         (gitops/commit commit-msg dir))
 
+      (when (and offline push)
+        (println "OFFLINE: Skipping push."))
+
+      ;; Push if flag is passed
+      (when-not offline
+        (when push
+          ;; If pushing, ensure the upstream branch exists
+          (when-not (gitops/upstream-branch-exists dir)
+            (gitops/push-set-origin target_branch dir))
+          ;; Then push if online, branch exists, etc.
+          (gitops/push dir)))
+
       ;; Success.
-      (println log-prefix "Finished building target"))
+      (println log-prefix "Finished building target."))
 
     (catch Exception e
       (println "Error encountered while handling branch " id)

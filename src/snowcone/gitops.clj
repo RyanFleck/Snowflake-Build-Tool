@@ -35,6 +35,19 @@
 (defn reset [dir]
   (run-command "git reset --hard" {:dir dir}))
 
+(defn push [dir]
+  (run-command "git push" {:dir dir}))
+
+(defn upstream-branch [dir]
+  (s/trim (:out (run-command "git rev-parse --abbrev-ref @{u}" {:dir dir}))))
+
+(defn upstream-branch-exists [dir]
+  (zero? (:exit (run-command "git rev-parse --abbrev-ref @{u}"
+                             {:dir dir :continue true :err :string}))))
+
+(defn push-set-origin [remote-branch dir]
+  (run-command (str "git push --set-upstream origin " remote-branch) {:dir dir}))
+
 (defn untrack-all [branch dir]
   (when-not (s/starts-with? branch "build")
     (throw (ex-info "Trying to untrack a non-build branch. Stopping." {})))
