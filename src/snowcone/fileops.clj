@@ -3,6 +3,7 @@
    [clojure.string :as s]
    [cheshire.core :as json]
    [selmer.parser :as selmer]
+   [selmer.util :refer [without-escaping]]
    [clj-yaml.core :as yaml]))
 
 (defn replace-strings
@@ -16,7 +17,8 @@
 
 (defn replace-mustaches
   [text replacement-key-pairs]
-  (str (selmer/render text replacement-key-pairs)))
+  (str (without-escaping
+        (selmer/render text replacement-key-pairs))))
 
 (defn replace-strings-in-file
   "Replaces every instance of each original-replacement pair in the target file."

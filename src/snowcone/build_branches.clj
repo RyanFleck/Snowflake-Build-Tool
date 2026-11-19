@@ -18,7 +18,7 @@
 import json
 
 def main():
-  return json.loads(\"\"\"
+  return json.loads(r\"\"\"
 {{ json }}
 \"\"\".strip())
 
