@@ -1,3 +1,5 @@
+![Snowcone](/docs/snowcone-logotype.png)
+
 # **Snowcone**: Snowflake Build Tool
 
 [![Clojure](https://img.shields.io/badge/clojure-babashka-%235881D8.svg?logo=clojure&logoColor=white)](https://book.babashka.org/)

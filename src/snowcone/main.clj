@@ -12,32 +12,40 @@
 ;; https://github.com/babashka/cli
 
 (def arg-spec
-  {:dir   {:alias :d
-           :desc "Run as if snowcone was started in <dir>"
-           :default (str (fs/cwd))
-           :validate                  ; tests if --dir exists,
-           {:pred fs/directory?         ; with a custom error message
-            :ex-msg (fn [{:keys [value]}]
-                      (str "Directory does not exist: " value))}}
+  "The command-line arguments to be parsed by the Snowcone command line."
+  {:dir
+   {:alias :d
+    :desc "Run as if snowcone was started in <dir>"
+    :default (str (fs/cwd))
+    :validate                  ; tests if --dir exists,
+    {:pred fs/directory?         ; with a custom error message
+     :ex-msg (fn [{:keys [value]}]
+               (str "Directory does not exist: " value))}}
 
-   :config-name {:alias :c
-                 :desc "The name of the project configuration file, default 'config.yml'"
-                 :default "config.yml"}
+   :config-name
+   {:alias :c
+    :desc "The name of the project configuration file, default 'config.yml'"
+    :default "config.yml"}
 
-   :push  {:coerce :boolean           ; defines a boolean flag
-           :desc "Push when finished with build operation"}
+   :push
+   {:coerce :boolean ; defines a boolean flag
+    :desc "Push when finished with build operation"}
 
-   :offline  {:coerce :boolean           ; defines a boolean flag
-              :desc "Don't fetch branches and perform other network-related git activites"}
+   :offline
+   {:coerce :boolean
+    :desc "Don't fetch branches and perform other network-related git activites"}
 
-   :show-config  {:coerce :boolean
-                  :desc "Show the loaded config after ingestion"}
+   :show-config
+   {:coerce :boolean
+    :desc "Show the loaded config after ingestion"}
 
-   :build-all-branches  {:coerce :boolean
-                   :desc "Branch-based builds: Rebuild from all base branches"}
+   :build-all-branches
+   {:coerce :boolean
+    :desc "Branch-based builds: Rebuild from all base branches"}
 
-   :verbose {:coerce :boolean
-             :desc "Show extra debugging outputs"}})
+   :verbose
+   {:coerce :boolean
+    :desc "Show extra debugging outputs"}})
 
 (defn clean-opts
   "Post-processing for incoming command line arguments"
