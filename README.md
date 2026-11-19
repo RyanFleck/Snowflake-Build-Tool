@@ -33,3 +33,9 @@ bb -cp ~/vc/Snowflake-Build-Tool/src -m snowcone.main
 ## Development
 
 Run `bb nrepl-server 0.0.0.0:1667` and then `M-x cider-connect-clj` to jack in.
+
+
+## Attribution
+
+- All code written by hand by [@RyanFleck](https://github.com/RyanFleck/Snowflake-Build-Tool)
+- "Snowcone" logo generated with ChatGPT
