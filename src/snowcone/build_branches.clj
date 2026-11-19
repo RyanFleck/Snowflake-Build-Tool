@@ -98,6 +98,7 @@ def main():
   (try
     (let [env-target-slug (s/trim (s/lower-case (name id)))
           ;; tmp-dir (str (fs/path dir (str ".tmp-" env-target-slug)))
+          upstream-exists (if offline false (gitops/upstream-branch-exists dir))
           log-prefix (s/upper-case (str env-target-slug "-BUILD: "))]
 
       (when verbose
@@ -109,7 +110,9 @@ def main():
       ;; Ensure the latest commits are fetched for the source and target branches
       (when-not offline
         (gitops/fetch-branch-from-origin source_branch dir)
-        (gitops/fetch-branch-from-origin target_branch dir)
+        (if upstream-exists
+          (gitops/fetch-branch-from-origin target_branch dir)
+          (gitops/push-set-origin target_branch dir))
         (println (str "Fetched source (" source_branch ") and target (" target_branch ") branches")))
 
       ;; Switch to the source branch (should not change the branch)
@@ -176,9 +179,6 @@ def main():
       ;; Push if flag is passed
       (when-not offline
         (when push
-          ;; If pushing, ensure the upstream branch exists
-          (when-not (gitops/upstream-branch-exists dir)
-            (gitops/push-set-origin target_branch dir))
           ;; Then push if online, branch exists, etc.
           (gitops/push dir)))
 
