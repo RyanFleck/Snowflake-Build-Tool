@@ -91,6 +91,8 @@
        (-> config-data
            (merge opts) ; include command line options in passed data
            (assoc :initial-branch (gitops/get-current-branch (:dir opts)))
+           (assoc :current-commit (gitops/current-commit (:dir opts)))
+           (assoc :current-commit-short (gitops/current-short-commit (:dir opts)))
            (checks/validate-config))))
     
     (println "Success. Please validate output.")))

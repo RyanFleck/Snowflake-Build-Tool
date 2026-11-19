@@ -68,3 +68,9 @@
      (str "git restore --source=" source-branch " -- " file-path)
      (str "git restore --source=origin/" source-branch " -- " file-path))
    {:dir dir}))
+
+(defn current-commit [dir]
+  (s/trim (:out (run-command "git rev-parse HEAD" {:dir dir}))))
+
+(defn current-short-commit [dir]
+  (s/trim (:out (run-command "git rev-parse --short HEAD" {:dir dir}))))

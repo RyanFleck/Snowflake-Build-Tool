@@ -137,7 +137,10 @@ def main():
       ;; ^^ Nope, trying to use
 
       ;; Commit
-      (let [commit-msg (str "BUILD[" (s/upper-case env-target-slug) "] " (datestamp))
+      (let [commit-msg (s/join " " [(str "BUILD[" (s/upper-case env-target-slug) "]")
+                                    (str "at " (datestamp))
+                                    (str "from branch '" source_branch "'")
+                                    (str "at commit '" (:current-commit config) "'")])
             lastbuild-file-path (str (fs/path dir ".lastbuild"))
             config-yml-file-path (str (fs/path dir "deployment.yml"))
             config-json-file-path (str (fs/path dir "deployment.json"))
@@ -155,20 +158,22 @@ def main():
                     ;; Re-associate the correct environment in-place
                    (assoc :environments {id (get-in config [:environments id])})
                     ;; Also include for legacy compatability
-                   (assoc :environment-data (get-in config [:environments id]))))]
+                   (assoc :environment-data (get-in config [:environments id]))))
+
+              branch-config-json (fileops/to-json branch-config-data)]
 
           ;; Write a yaml deployment info file
           (spit config-yml-file-path (fileops/to-yaml branch-config-data))
           (gitops/add-file config-yml-file-path dir)
 
           ;; Write a json deployment info file
-          (spit config-json-file-path (fileops/to-json branch-config-data))
+          (spit config-json-file-path branch-config-json)
           (gitops/add-file config-json-file-path dir)
 
           ;; Write a python deployment info file.
           (spit config-py-file-path (fileops/replace-mustaches
                                      python-json-loading-template
-                                     {:json branch-config-data}))
+                                     {:json branch-config-json}))
           (gitops/add-file config-py-file-path dir))
 
         ;; Commit the changes
