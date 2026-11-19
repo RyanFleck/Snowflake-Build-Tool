@@ -3,6 +3,7 @@
    [snowcone.shell :refer [run-command]]
    [snowcone.gitops :as gitops]
    [snowcone.dates :refer [datestamp]]
+   [snowcone.fileops :refer [replace-strings-in-file]]
    [babashka.fs :as fs]
    [clojure.set :as set]
    [clojure.pprint :refer [pprint]]
@@ -22,12 +23,16 @@
   (-> (str (fs/path path notebook-file))
       (s/replace #"^/" "")))
 
+(defn clean-full-notebook-path [dir path notebook-file]
+  (-> (str (fs/path dir path notebook-file))))
+
 (defn copy-and-transform-single-notebook
   [notebook-file
    {:keys [id notebooks path] :as notebook-data}
-   {:keys [source_branch target_branch] :as target-data}
+   {:keys [source_branch target_branch replacements] :as target-data}
    {:keys [dir verbose offline] :as config}]
-  (let [file-path (clean-notebook-path path notebook-file)]
+  (let [file-path (clean-notebook-path path notebook-file)
+        full-file-path (clean-full-notebook-path dir path notebook-file)]
     (println (str "Handling " file-path))
 
     ;; Restore file to correct location
@@ -35,6 +40,9 @@
     (gitops/add-file file-path dir)
     (println (str "Restored notebook to path " file-path))
     ;; If there is an exception this will need to be rolled back
+
+    ;; Rewrite notebook with any replacements
+    (replace-strings-in-file full-file-path replacements)
 
     (println (str "Finished handling " file-path))))
 
@@ -105,7 +113,7 @@
     ;; ^^ Nope, trying to use
 
     ;; Commit
-    (let [commit-msg (str "BUILD[" env-target-slug "] " (datestamp))
+    (let [commit-msg (str "BUILD[" (s/upper-case env-target-slug) "] " (datestamp))
           lastbuild-file-path (str (fs/path dir ".lastbuild"))]
 
       ;; Write a 'last build' file
