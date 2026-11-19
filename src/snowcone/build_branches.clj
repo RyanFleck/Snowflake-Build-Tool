@@ -98,7 +98,6 @@ def main():
   (try
     (let [env-target-slug (s/trim (s/lower-case (name id)))
           ;; tmp-dir (str (fs/path dir (str ".tmp-" env-target-slug)))
-          upstream-exists (if offline false (gitops/upstream-branch-exists dir))
           log-prefix (s/upper-case (str env-target-slug "-BUILD: "))]
 
       (when verbose
@@ -107,17 +106,20 @@ def main():
 
       (println (str "\n" (s/upper-case env-target-slug) ": Building target"))
 
-      ;; Ensure the latest commits are fetched for the source and target branches
+      ;; Ensure the latest commits are fetched for the source
       (when-not offline
         (gitops/fetch-branch-from-origin source_branch dir)
-        (if upstream-exists
-          (gitops/fetch-branch-from-origin target_branch dir)
-          (gitops/push-set-origin target_branch dir))
-        (println (str "Fetched source (" source_branch ") and target (" target_branch ") branches")))
+        (println (str "Fetched source (" source_branch ") branch")))
 
       ;; Switch to the source branch (should not change the branch)
       (gitops/switch-branch target_branch dir)
       (println (str "Switched to branch '" target_branch "'"))
+
+      (when-not offline
+        (when-not (gitops/upstream-branch-exists dir)
+          (throw (ex-info "Upstream branch does not exist." target-data)))
+        (gitops/fetch-branch-from-origin target_branch dir)
+        (println (str "Fetched target ("  target_branch ") branch")))
 
       ;; Untrack all files for a clean start in the target branch
       (when-not (empty? (gitops/list-tracked-files target_branch dir))
