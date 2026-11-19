@@ -9,23 +9,49 @@
 (defn switch-branch [branch dir]
   (run-command (str "git checkout " branch) {:dir dir}))
 
-
 (defn fetch-all [dir]
   (run-command "git fetch --all" {:dir dir}))
 
-(defn fetch-branch-from-origin 
+(defn fetch-branch-from-origin
   "Fetches the latest commit for the target branch from origin."
   [branch dir]
   (run-command (str "git fetch origin " branch " --depth=1") {:dir dir}))
 
 (defn get-all-branches [dir]
-  (->> (:out (run-command "git branch" {:dir dir}))
+  (->> (run-command "git branch" {:dir dir})
+       :out
        (s/split-lines)
        (map #(s/trim (subs % 1)))
        (set)))
 
-(defn restore-file 
+(defn add-file [file dir]
+  (run-command (str "git add " file) {:dir dir}))
+
+(defn commit [message dir]
+  (run-command
+   ["git" "commit" "-m" (str message)]
+   {:dir dir :raw-args true}))
+
+(defn reset [dir]
+  (run-command "git reset --hard" {:dir dir}))
+
+(defn untrack-all [branch dir]
+  (when-not (s/starts-with? branch "build")
+    (throw (ex-info "Trying to untrack a non-build branch. Stopping." {})))
+  (run-command "git rm -rf --cached ." {:dir dir}))
+
+(defn list-tracked-files [branch dir]
+  (->>
+   (run-command (str "git ls-tree -r --name-only --full-tree " branch) {:dir dir})
+   :out
+   (s/split-lines)
+   (remove s/blank?)))
+
+(defn restore-file
   "A method of copying a file between branches."
-  [file-path source-branch dir]
-  (run-command 
-   (str "git restore --source=origin/" source-branch " -- " file-path) {:dir dir}))
+  [file-path source-branch dir offline]
+  (run-command
+   (if offline
+     (str "git restore --source=" source-branch " -- " file-path)
+     (str "git restore --source=origin/" source-branch " -- " file-path))
+   {:dir dir}))

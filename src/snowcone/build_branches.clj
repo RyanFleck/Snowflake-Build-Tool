@@ -2,6 +2,7 @@
   (:require
    [snowcone.shell :refer [run-command]]
    [snowcone.gitops :as gitops]
+   [snowcone.dates :refer [datestamp]]
    [babashka.fs :as fs]
    [clojure.set :as set]
    [clojure.pprint :refer [pprint]]
@@ -17,24 +18,60 @@
        (mapcat (juxt :source_branch :target_branch))
        (set)))
 
-(defn copy-and-transform-one-notebook
-  [{:keys [id] :as notebook-data}
+(defn clean-notebook-path [path notebook-file]
+  (-> (str (fs/path path notebook-file))
+      (s/replace #"^/" "")))
+
+(defn copy-and-transform-single-notebook
+  [notebook-file
+   {:keys [id notebooks path] :as notebook-data}
    {:keys [source_branch target_branch] :as target-data}
    {:keys [dir verbose offline] :as config}]
-  (println (str "Handling notebook " (name id)))
+  (let [file-path (clean-notebook-path path notebook-file)]
+    (println (str "Handling " file-path))
 
-  (when verbose
-    (println (str (name id) " notebook data:" ))
-    (pprint notebook-data)))
+    ;; Restore file to correct location
+    (gitops/restore-file file-path source_branch dir offline)
+    (gitops/add-file file-path dir)
+    (println (str "Restored notebook to path " file-path))
+    ;; If there is an exception this will need to be rolled back
+
+    (println (str "Finished handling " file-path))))
+
+(defn copy-and-transform-one-notebook-set
+  "Given a folder of notebooks, copy and transform all notebooks to the branch."
+  [{:keys [id notebooks] :as notebook-data}
+   {:keys [source_branch target_branch] :as target-data}
+   {:keys [dir verbose offline] :as config}]
+
+  (let [current-branch (gitops/get-current-branch dir)]
+
+    ;; If not already, switch to the correct target branch.
+    (when-not (= current-branch target_branch)
+      (gitops/switch-branch target_branch dir)
+      (println (str "Switched to branch '" target_branch "'")))
+
+    (println (str "Handling " (count notebooks) " notebooks for " (name id) " in branch '" target_branch "'"))
+
+    (when verbose
+      (println (str (name id) " notebook data:"))
+      (pprint notebook-data))
+
+    (doseq [notebook-file notebooks]
+      (copy-and-transform-single-notebook
+       notebook-file notebook-data
+       target-data config))
+
+    (println "Notebook set handled.")))
 
 (defn build-one-branch
-  "Given a target branch, assemble the files."
+  "Given a target branch, assemble all notebooks for that branch."
   [{:keys [id source_branch target_branch] :as target-data}
    {:keys [dir verbose offline notebooks] :as config}]
 
   (let [env-target-slug (s/trim (s/lower-case (name id)))
         ;; tmp-dir (str (fs/path dir (str ".tmp-" env-target-slug)))
-        log-prefix (str env-target-slug "-BUILD: ")]
+        log-prefix (s/upper-case (str env-target-slug "-BUILD: "))]
 
     (when verbose
       (println (str "\nDEBUG: '" (s/upper-case env-target-slug) "' Target Data:"))
@@ -52,16 +89,32 @@
     (gitops/switch-branch target_branch dir)
     (println (str "Switched to branch '" target_branch "'"))
 
+    ;; Untrack all files for a clean start in the target branch
+    (when-not (empty? (gitops/list-tracked-files target_branch dir))
+      (gitops/untrack-all target_branch dir))
+
     ;; Create .tmp-build-<slug> directory to copy files to
     ;; -p -> make if already exists
     ;; (run-command (str "mkdir -p " tmp-dir) {:dir dir})
     ;; (println "Working in directory" tmp-dir)
     (doseq [[id notebook] notebooks]
-      (copy-and-transform-one-notebook
+      (copy-and-transform-one-notebook-set
        (assoc notebook :id id) target-data config))
 
     ;; Find all notebook files and copy them to the temporary directory
     ;; ^^ Nope, trying to use
+
+    ;; Commit
+    (let [commit-msg (str "BUILD[" env-target-slug "] " (datestamp))
+          lastbuild-file-path (str (fs/path dir ".lastbuild"))]
+
+      ;; Write a 'last build' file
+      (spit lastbuild-file-path commit-msg)
+      (gitops/add-file lastbuild-file-path dir)
+
+      ;; Commit the changes
+      (println (str "Building with commit message: " commit-msg))
+      (gitops/commit commit-msg dir))
 
     ;; Success.
     (println log-prefix "Finished building target")))

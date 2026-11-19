@@ -9,12 +9,14 @@
 
 (defn run-command
   "Runs a command, raises an exception if an error is encountered."
-  ([^String cmd] (run-command cmd {}))
-  ([^String cmd options]
+  ([cmd] (run-command cmd {}))
+  ([cmd options]
    (println (str "CMD: Running command '" cmd "' with options: " options))
    (apply p/shell
           (merge {:out :string :err :string} options)
-          (split-to-list cmd))))
+          (if (:raw-args options)
+            cmd ;; pass a vector
+            (split-to-list cmd)))))
 
 ;; ================================================================================
 ;; Testing
