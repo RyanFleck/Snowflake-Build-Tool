@@ -55,6 +55,10 @@
     (println (str "Branches required: " required-branches))
     (println (str "Branches in repository: " repo-branches))
 
+    ;; Fail if branch name seems wrong
+    ;; (when (s/starts-with? current-branch "build")
+    ;;   (throw (ex-info "You appear to be inside a build branch." {:branch current-branch})))
+
     ;; Warn if key build-branches are missing and need to be created.
     (when-not (empty? missing-branches)
       (throw (ex-info (s/join "\n" ["Git branches missing, create them: "
@@ -81,10 +85,11 @@
 
     ;; We can destructure the map entry to [key value]
       (doseq [[target-id target-data] target-envs]
-        (build-one-branch target-data target-id config))))
+        (build-one-branch target-data target-id config)))
 
-;; (throw (ex-info "Not yet implemented." config))
-  )
+    ;; Switch home and signal success.
+    (gitops/switch-branch current-branch dir)
+    (println (str "Completed build from '" current-branch "' branch."))))
 
 (comment
   (build-branches t))
