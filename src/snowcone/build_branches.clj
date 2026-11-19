@@ -4,35 +4,67 @@
    [snowcone.gitops :as gitops]
    [babashka.fs :as fs]
    [clojure.set :as set]
+   [clojure.pprint :refer [pprint]]
    [clojure.string :as str]
    [clojure.string :as s]))
+
+;; REPL:
+;; C-u C-c C-z to switch to this namespace inside the repl
+;; TODO: Rebind lsp-find-definition 
 
 (defn config-branches [{:keys [environments]}]
   (->> (vals environments)
        (mapcat (juxt :source_branch :target_branch))
        (set)))
 
-(defn git-repo-branches [{:keys [dir]}]
-  (->> (:out (run-command "git branch" {:dir dir}))
-       (s/split-lines)
-       (map #(s/trim (subs % 1)))
-       (set)))
+(defn copy-and-transform-one-notebook
+  [{:keys [id] :as notebook-data}
+   {:keys [source_branch target_branch] :as target-data}
+   {:keys [dir verbose offline] :as config}]
+  (println (str "Handling notebook " (name id)))
+
+  (when verbose
+    (println (str (name id) " notebook data:" ))
+    (pprint notebook-data)))
 
 (defn build-one-branch
   "Given a target branch, assemble the files."
-  [target-data target-id {:keys [dir verbose] :as config}]
+  [{:keys [id source_branch target_branch] :as target-data}
+   {:keys [dir verbose offline notebooks] :as config}]
 
-  (when verbose
-    (println "\nUsing data to build target:")
-    (prn target-data))
+  (let [env-target-slug (s/trim (s/lower-case (name id)))
+        ;; tmp-dir (str (fs/path dir (str ".tmp-" env-target-slug)))
+        log-prefix (str env-target-slug "-BUILD: ")]
 
-  (println (str "Building target '" target-id "'"))
-  
-  ;; Switch to the source branch
-  (gitops/switch-branch (:source_branch target-data) dir)
+    (when verbose
+      (println (str "\nDEBUG: '" (s/upper-case env-target-slug) "' Target Data:"))
+      (prn target-data))
 
-  ;; Create .tmp-build-<slug> directory to copy files to
-)
+    (println (str "\n" (s/upper-case env-target-slug) ": Building target"))
+
+    ;; Ensure the latest commits are fetched for the source and target branches
+    (when-not offline
+      (gitops/fetch-branch-from-origin source_branch dir)
+      (gitops/fetch-branch-from-origin target_branch dir)
+      (println (str "Fetched source (" source_branch ") and target (" target_branch ") branches")))
+
+    ;; Switch to the source branch (should not change the branch)
+    (gitops/switch-branch target_branch dir)
+    (println (str "Switched to branch '" target_branch "'"))
+
+    ;; Create .tmp-build-<slug> directory to copy files to
+    ;; -p -> make if already exists
+    ;; (run-command (str "mkdir -p " tmp-dir) {:dir dir})
+    ;; (println "Working in directory" tmp-dir)
+    (doseq [[id notebook] notebooks]
+      (copy-and-transform-one-notebook
+       (assoc notebook :id id) target-data config))
+
+    ;; Find all notebook files and copy them to the temporary directory
+    ;; ^^ Nope, trying to use
+
+    ;; Success.
+    (println log-prefix "Finished building target")))
 
 (defn build-branches
   "Proceeds with the construction of build branches."
@@ -40,13 +72,13 @@
   (println "Branching build strategy selected.")
 
   (when-not offline
-    (run-command "git fetch --all" {:dir dir})
+    (gitops/fetch-all dir)
     (println "Fetched latest git branches from remote"))
 
   ;; Pull all branches from config and verify they exist
   (let [current-branch (gitops/get-current-branch dir)
+        repo-branches (gitops/get-all-branches dir)
         required-branches (config-branches config)
-        repo-branches (git-repo-branches config)
         missing-branches (set/difference required-branches repo-branches)]
 
     ;; Not building from the config in 'development' or 'master' could cause problems
@@ -85,9 +117,10 @@
 
     ;; We can destructure the map entry to [key value]
       (doseq [[target-id target-data] target-envs]
-        (build-one-branch target-data target-id config)))
+        (build-one-branch (assoc target-data :id target-id) config)))
 
     ;; Switch home and signal success.
+    (println "\nSuccess.")
     (gitops/switch-branch current-branch dir)
     (println (str "Completed build from '" current-branch "' branch."))))
 

@@ -7,7 +7,7 @@
 
 Tool for assembling Snowflake SQL projects into deployment scripts, AKA "**Snowcone**".
 
-Written in **Clojure** language - see the [babashka docs](https://manuals.ryanfleck.ca/clj/#babashka) for notes.
+Written in **Clojure** language - see the [babashka docs](https://manuals.ryanfleck.ca/clj/#babashka) and my [personal Clojure manual](https://manuals.ryanfleck.ca/clj/#babashka) for notes.
 
 [github.com/RyanFleck/Snowflake-Build-Tool](https://github.com/RyanFleck/Snowflake-Build-Tool)
 
