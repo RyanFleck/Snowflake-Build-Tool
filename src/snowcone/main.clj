@@ -5,6 +5,7 @@
    [snowcone.build-branches :refer [build-branches]]
    [babashka.cli :as cli]
    [snowcone.config :refer [get-config-data]]
+   [snowcone.gitops :as gitops]
    [clojure.pprint :refer [pprint]]
    [babashka.fs :as fs]))
 
@@ -21,28 +22,28 @@
     {:pred fs/directory?         ; with a custom error message
      :ex-msg (fn [{:keys [value]}]
                (str "Directory does not exist: " value))}}
-
+   
    :config-name
    {:alias :c
     :desc "The name of the project configuration file, default 'config.yml'"
     :default "config.yml"}
-
+   
    :push
    {:coerce :boolean ; defines a boolean flag
     :desc "Push when finished with build operation"}
-
+   
    :offline
    {:coerce :boolean
     :desc "Don't fetch branches and perform other network-related git activites"}
-
+   
    :show-config
    {:coerce :boolean
     :desc "Show the loaded config after ingestion"}
-
+   
    :build-all-branches
    {:coerce :boolean
     :desc "Branch-based builds: Rebuild from all base branches"}
-
+   
    :verbose
    {:coerce :boolean
     :desc "Show extra debugging outputs"}})
@@ -57,12 +58,12 @@
 (defn build-project
   "With cleaned and validated config data, builds the Snowflake project."
   [config]
-
+  
   ;; Show configuration if asked for
   (when (or (:show-config config) (:verbose config))
     (println "Building project with configuration data:")
     (pprint config))
-
+  
   ;; Launch build based on build type
   (let [build-type (get-in config [:build :type])]
     (case (keyword build-type)
@@ -75,22 +76,23 @@
   [input-opts]
   (println "\n\nSNOWCONE: Snowflake Build Tool 0.1.0")
   (let [opts (clean-opts input-opts)]
-
+    
     (when (:verbose opts)
       (println "Command line arguments passed:")
       (pprint opts))
-
+    
     ;; Preflight Checks
     (checks/check-if-git-repository-root (:dir opts))
     (checks/check-if-config-file-is-parsable (:dir opts))
-
+    
     ;; Combine config data with cli-opts
     (let [config-data (get-config-data (:dir opts) (:config-name opts))]
       (build-project
        (-> config-data
            (merge opts) ; include command line options in passed data
+           (assoc :initial-branch (gitops/get-current-branch (:dir opts)))
            (checks/validate-config))))
-
+    
     (println "Success. Please validate output.")))
 
 (defn -main
@@ -112,7 +114,7 @@
   ;; Test the main procedure
   (-main)
   (add 1 2)
-
+  
   ;; To run main in a babashka script:
   ;;(apply -main *command-line-args*)
   )
