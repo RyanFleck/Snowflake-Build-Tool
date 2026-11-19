@@ -37,13 +37,14 @@
 
     ;; Restore file to correct location
     (gitops/restore-file file-path source_branch dir offline)
-    (gitops/add-file file-path dir)
     (println (str "Restored notebook to path " file-path))
     ;; If there is an exception this will need to be rolled back
 
     ;; Rewrite notebook with any replacements
     (replace-strings-in-file full-file-path replacements)
-
+    
+    ;; Add changes
+    (gitops/add-file file-path dir)
     (println (str "Finished handling " file-path))))
 
 (defn copy-and-transform-one-notebook-set
