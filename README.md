@@ -1,14 +1,8 @@
-# **Snowcone**: Snowflake Build Tool
+![Snowcone](/docs/snowcone-logotype.png)
 
 [![Clojure](https://img.shields.io/badge/clojure-babashka-%235881D8.svg?logo=clojure&logoColor=white)](https://book.babashka.org/)
 [![GitHub](https://img.shields.io/badge/github-hosted-blue?logo=github&logocolor=white)](https://github.com/RyanFleck/Snowflake-Build-Tool)
 [![Tests](https://github.com/RyanFleck/Snowflake-Build-Tool/actions/workflows/test.yml/badge.svg)](https://github.com/RyanFleck/Snowflake-Build-Tool/actions/workflows/test.yml)
-
-<br />
-
-![Snowcone](/docs/snowcone-logotype.png)
-
-
 
 <br />
 
@@ -26,8 +20,6 @@ See https://github.com/babashka/babashka#installation
 
 On MacOS: `brew install borkdude/brew/babashka`
 
-<br />
-
 ## Execution
 
 To run, provide `bb` with the cloned classpath and main location.
@@ -36,13 +28,9 @@ To run, provide `bb` with the cloned classpath and main location.
 bb -cp ~/vc/Snowflake-Build-Tool/src -m snowcone.main
 ```
 
-<br />
-
 ## Development
 
 Run `bb nrepl-server 0.0.0.0:1667` and then `M-x cider-connect-clj` to jack in.
-
-<br />
 
 ## Attribution
 
