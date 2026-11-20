@@ -10,14 +10,14 @@
 
 **Snowcone**: A devops tool for assembling Snowflake SQL projects into deployment scripts. Written in **Clojure** language - see the [babashka docs](https://manuals.ryanfleck.ca/clj/#babashka) and my [personal Clojure manual](https://manuals.ryanfleck.ca/clj/#babashka) for notes.
 
-Snowcone can build two different project types in two different modes.
+Snowcone can build two different project types in two different **build modes**, shown below.
 
 **Build Matrix**:
 
-|                    | **File-Based**                    | **Branch-Based**               |
-|:-------------------|:----------------------------------|:-------------------------------|
-| **SQL Files**      | Combined file in build/<env>      | Combined file in build branch  |
-| **Data Notebooks** | Structure retained in build/<env> | Root structure in build branch |
+|                      | **File-Based Build**              | **Branch-Based Build**         |
+|:---------------------|:----------------------------------|:-------------------------------|
+| **SQL File Project** | Combined file in build/<env>      | Combined file in build branch  |
+| **Data Notebooks**   | Structure retained in build/<env> | Root structure in build branch |
 
 Hosted at [github.com/RyanFleck/Snowflake-Build-Tool](https://github.com/RyanFleck/Snowflake-Build-Tool)
 
