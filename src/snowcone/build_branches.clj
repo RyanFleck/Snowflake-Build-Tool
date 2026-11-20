@@ -154,11 +154,13 @@ def main():
               (doall
                (-> config
                    (assoc :current-environment id)
-                   (dissoc :environments :dir :offline)
+                   (dissoc :environments :dir :offline :notebooks)
                     ;; Re-associate the correct environment in-place
                    (assoc :environments {id (get-in config [:environments id])})
                     ;; Also include for legacy compatability
-                   (assoc :environment-data (get-in config [:environments id]))))
+                   (assoc :environment-data (assoc (get-in config [:environments id]) :id id))
+                   ;; Also provide notebooks as a list for compatability
+                   (assoc :notebooks (mapv (fn [[k v]] (assoc v :id k)) (:notebooks config)))))
 
               branch-config-json (fileops/to-json branch-config-data)]
 
