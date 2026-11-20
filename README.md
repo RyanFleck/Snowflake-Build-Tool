@@ -8,11 +8,9 @@
 
 <br />
 
-A devops tool for assembling Snowflake SQL projects into deployment scripts, AKA "**Snowcone**".
+**Snowcone**: A devops tool for assembling Snowflake SQL projects into deployment scripts. Written in **Clojure** language - see the [babashka docs](https://manuals.ryanfleck.ca/clj/#babashka) and my [personal Clojure manual](https://manuals.ryanfleck.ca/clj/#babashka) for notes.
 
-Written in **Clojure** language - see the [babashka docs](https://manuals.ryanfleck.ca/clj/#babashka) and my [personal Clojure manual](https://manuals.ryanfleck.ca/clj/#babashka) for notes.
-
-[github.com/RyanFleck/Snowflake-Build-Tool](https://github.com/RyanFleck/Snowflake-Build-Tool)
+Hosted at [github.com/RyanFleck/Snowflake-Build-Tool](https://github.com/RyanFleck/Snowflake-Build-Tool)
 
 <br />
 
@@ -21,6 +19,8 @@ Written in **Clojure** language - see the [babashka docs](https://manuals.ryanfl
 See https://github.com/babashka/babashka#installation
 
 On MacOS: `brew install borkdude/brew/babashka`
+
+Once the `bb` executable is present on the system, the program can be run.
 
 ## Execution
 
