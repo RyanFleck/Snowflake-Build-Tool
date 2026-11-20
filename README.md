@@ -1,8 +1,10 @@
 ![Snowcone](/docs/snowcone-logotype.png)
 
 [![Clojure](https://img.shields.io/badge/clojure-babashka-%235881D8.svg?logo=clojure&logoColor=white)](https://book.babashka.org/)
-[![GitHub](https://img.shields.io/badge/github-hosted-blue?logo=github&logocolor=white)](https://github.com/RyanFleck/Snowflake-Build-Tool)
+[![GitHub](https://img.shields.io/badge/github-hosted-blue?logo=github&logoColor=white)](https://github.com/RyanFleck/Snowflake-Build-Tool)
 [![Tests](https://github.com/RyanFleck/Snowflake-Build-Tool/actions/workflows/test.yml/badge.svg)](https://github.com/RyanFleck/Snowflake-Build-Tool/actions/workflows/test.yml)
+[![Licence - GNU GPL V3](https://img.shields.io/badge/license-GNU/GPLv3-red?logo=gnu&logoColor=white)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![Handwritten](https://img.shields.io/badge/authorship-handwritten-purple?logo=gnuemacs&logoColor=white)](https://ryanfleck.ca/about/)
 
 <br />
 
