@@ -1,4 +1,4 @@
-![Snowcone](/docs/snowcone-logotype.png)
+[![Snowcone](/docs/snowcone-logotype.png)](https://github.com/RyanFleck/Snowflake-Build-Tool)
 
 [![Clojure](https://img.shields.io/badge/clojure-babashka-%235881D8.svg?logo=clojure&logoColor=white)](https://book.babashka.org/)
 [![GitHub](https://img.shields.io/badge/github-hosted-blue?logo=github&logoColor=white)](https://github.com/RyanFleck/Snowflake-Build-Tool)
@@ -36,5 +36,5 @@ Run `bb nrepl-server 0.0.0.0:1667` and then `M-x cider-connect-clj` to jack in.
 
 ## Attribution
 
-- All code written by hand by [@RyanFleck](https://github.com/RyanFleck/Snowflake-Build-Tool)
+- All code written by hand by [@RyanFleck](https://github.com/RyanFleck)
 - "Snowcone" logo generated with ChatGPT
