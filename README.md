@@ -47,3 +47,60 @@ Run `bb nrepl-server 0.0.0.0:1667` and then `M-x cider-connect-clj` to jack in.
 
 - All code written by hand by [@RyanFleck](https://github.com/RyanFleck)
 - "Snowcone" logo generated with ChatGPT
+
+## Project Structure & Config Examples
+
+### Data Notebook Project - Branch-Based Build
+
+The project's `config.yml` includes a one-time and cron_schedule notebook. These elements are **not** handled by Snowcone - all of these keys and values are passed through to configuration files at the root of every branch for further action within Snowflake. Snowcone is only responsible for building and organizing the project in an optimal way to read it from Snowflake.
+
+```yaml
+project:
+  name: "Example Data Product"
+  description: "Example notebook project."
+  type: notebooks
+
+build:
+  type: branch # folder or branch
+
+notebooks:
+  REPORT_A:
+    path: "REPORT_A/"
+    notebooks:
+      - "REPORT_A.ipynb"
+    deployment: run_once
+
+  REPORT_B:
+    path: "REPORT_B/"
+    notebooks:
+      - "REPORT_B.ipynb"
+    deployment: scheduled
+    cron_schedule: "0 5 * * * America/Toronto"
+    
+
+environments:
+  dev:
+    name: Development
+    source_branch: development
+    target_branch: build-dev
+    role: DEPLOY_ROLE_DEV
+    database: EXAMPLE_DB_DEV
+    schema: EXAMPLE_SCHEMA
+    warehouse: EXAMPLE_WH_DEV
+    replacements:
+      - ["/main/", "/development/"]
+
+  prd:
+    name: Production
+    source_branch: main
+    target_branch: build-prd
+    role: DEPLOY_ROLE_PRD
+    database: EXAMPLE_DB_PRD
+    schema: EXAMPLE_SCHEMA
+    warehouse: EXAMPLE_WH_PRD
+    replacements:
+      - ["/development/", "/main/"]
+      - ["DEPLOY_ROLE_DEV", "DEPLOY_ROLE_PRD"]
+      - ["EXAMPLE_WH_DEV", "EXAMPLE_WH_PRD"]
+      - ["EXAMPLE_DB_DEV", "EXAMPLE_DB_PRD"]
+```
